@@ -19,9 +19,8 @@ report_path <- file.path(output_dir, "hdb_rental_eda.md")
 if (!file.exists(train_path)) stop("Missing train.csv: ", train_path)
 dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
-source_files <- sort(list.files(data_dir, recursive = TRUE, full.names = TRUE))
-source_files <- source_files[file.info(source_files)$isdir %in% FALSE]
-hash_before <- tools::md5sum(source_files)
+# Hash only the source dataset used by this EDA. test.csv is neither read nor hashed.
+hash_before <- tools::md5sum(train_path)
 
 options(scipen = 999)
 theme_set(theme_minimal(base_size = 12))
@@ -51,6 +50,11 @@ eda <- train %>%
     approval_date = as.Date(paste0(RENT_APPROVAL_DATE, "-01")),
     approval_year = as.integer(format(approval_date, "%Y")),
     approval_month = as.integer(format(approval_date, "%m")),
+    approval_quarter_date = as.Date(sprintf(
+      "%d-%02d-01", approval_year, (((approval_month - 1) %/% 3) * 3) + 1
+    )),
+    approval_quarter = paste0(approval_year, " Q", ((approval_month - 1) %/% 3) + 1),
+    town_std = normalise_case_space(TOWN),
     flat_age = approval_year - LEASE_COMMENCE_DATE,
     flat_type_std = normalise_flat_type(FLAT_TYPE),
     street_std = normalise_case_space(STREET),
@@ -140,6 +144,150 @@ monthly <- eda %>%
     median_rent = median(MONTHLY_RENT), .groups = "drop"
   ) %>%
   arrange(approval_date)
+
+observed_months <- sort(unique(eda$approval_date[!is.na(eda$approval_date)]))
+early_months <- head(observed_months, 6)
+late_months <- tail(observed_months, 6)
+early_period_label <- paste0(format(min(early_months), "%Y-%m"), " to ", format(max(early_months), "%Y-%m"))
+late_period_label <- paste0(format(min(late_months), "%Y-%m"), " to ", format(max(late_months), "%Y-%m"))
+
+quarter_levels <- eda %>%
+  filter(!is.na(approval_date)) %>%
+  distinct(approval_quarter_date, approval_quarter) %>%
+  arrange(approval_quarter_date) %>%
+  pull(approval_quarter)
+
+town_quarter <- eda %>%
+  filter(!is.na(town_std), !is.na(approval_date), !is.na(MONTHLY_RENT)) %>%
+  group_by(town_std, approval_quarter) %>%
+  summarise(records = n(), median_rent = median(MONTHLY_RENT), .groups = "drop")
+
+latest_quarter <- tail(quarter_levels, 1)
+town_order_latest <- town_quarter %>%
+  filter(approval_quarter == latest_quarter) %>%
+  arrange(desc(median_rent), desc(records), town_std) %>%
+  pull(town_std)
+
+town_temporal_summary <- eda %>%
+  filter(!is.na(town_std), !is.na(approval_date), !is.na(MONTHLY_RENT)) %>%
+  group_by(town_std) %>%
+  summarise(
+    Records = n(),
+    Early_median_rent = median(MONTHLY_RENT[approval_date %in% early_months]),
+    Late_median_rent = median(MONTHLY_RENT[approval_date %in% late_months]),
+    Absolute_change = Late_median_rent - Early_median_rent,
+    Percentage_change_pct = 100 * Absolute_change / Early_median_rent,
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Late_median_rent), desc(Percentage_change_pct))
+names(town_temporal_summary)[1] <- "TOWN"
+town_temporal_summary_display <- town_temporal_summary
+names(town_temporal_summary_display) <- c(
+  "TOWN", "Records", "Early median rent", "Late median rent",
+  "Absolute change", "Percentage change (%)"
+)
+
+comparison_period <- eda %>%
+  filter(approval_date %in% c(early_months, late_months)) %>%
+  mutate(Window = factor(
+    ifelse(approval_date %in% early_months, "Early", "Late"),
+    levels = c("Early", "Late")
+  ))
+
+flat_type_quarter_share <- eda %>%
+  filter(!is.na(approval_quarter_date), !is.na(flat_type_std)) %>%
+  count(approval_quarter_date, approval_quarter, flat_type_std, name = "records") %>%
+  group_by(approval_quarter_date, approval_quarter) %>%
+  mutate(share = records / sum(records)) %>%
+  ungroup()
+
+major_flat_types <- eda %>%
+  filter(!is.na(flat_type_std)) %>%
+  count(flat_type_std, sort = TRUE) %>%
+  slice_head(n = 5) %>%
+  pull(flat_type_std)
+
+flat_type_composition_change <- comparison_period %>%
+  filter(!is.na(flat_type_std)) %>%
+  count(Window, flat_type_std, name = "Records") %>%
+  group_by(Window) %>%
+  mutate(Share = Records / sum(Records)) %>%
+  ungroup() %>%
+  select(Window, flat_type_std, Share) %>%
+  pivot_wider(names_from = Window, values_from = Share, values_fill = 0) %>%
+  mutate(
+    Early_share_pct = 100 * Early,
+    Late_share_pct = 100 * Late,
+    Share_change_pp = 100 * (Late - Early)
+  ) %>%
+  arrange(desc(abs(Share_change_pp)))
+flat_type_tvd_pp <- 50 * sum(abs(flat_type_composition_change$Late - flat_type_composition_change$Early))
+flat_type_composition_display <- flat_type_composition_change %>%
+  select(flat_type_std, Early_share_pct, Late_share_pct, Share_change_pp)
+names(flat_type_composition_display) <- c(
+  "FLAT_TYPE", "Early share (%)", "Late share (%)", "Change (percentage points)"
+)
+
+town_quarter_share <- eda %>%
+  filter(!is.na(approval_quarter_date), !is.na(town_std)) %>%
+  count(approval_quarter_date, approval_quarter, town_std, name = "records") %>%
+  group_by(approval_quarter_date, approval_quarter) %>%
+  mutate(share = records / sum(records)) %>%
+  ungroup()
+
+largest_towns <- eda %>%
+  filter(!is.na(town_std)) %>%
+  count(town_std, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pull(town_std)
+
+town_composition_change <- comparison_period %>%
+  filter(!is.na(town_std)) %>%
+  count(Window, town_std, name = "Records") %>%
+  group_by(Window) %>%
+  mutate(Share = Records / sum(Records)) %>%
+  ungroup() %>%
+  select(Window, town_std, Share) %>%
+  pivot_wider(names_from = Window, values_from = Share, values_fill = 0) %>%
+  mutate(
+    Early_share_pct = 100 * Early,
+    Late_share_pct = 100 * Late,
+    Share_change_pp = 100 * (Late - Early)
+  ) %>%
+  arrange(desc(abs(Share_change_pp)))
+town_tvd_pp <- 50 * sum(abs(town_composition_change$Late - town_composition_change$Early))
+town_composition_display <- town_composition_change %>%
+  slice_head(n = 10) %>%
+  select(town_std, Early_share_pct, Late_share_pct, Share_change_pp)
+names(town_composition_display) <- c(
+  "TOWN", "Early share (%)", "Late share (%)", "Change (percentage points)"
+)
+
+floor_area_quarter <- eda %>%
+  filter(!is.na(approval_quarter_date), !is.na(FLOOR_AREA_SQM)) %>%
+  group_by(approval_quarter_date, approval_quarter) %>%
+  summarise(
+    records = n(),
+    q1_area = quantile(FLOOR_AREA_SQM, 0.25),
+    median_area = median(FLOOR_AREA_SQM),
+    q3_area = quantile(FLOOR_AREA_SQM, 0.75),
+    .groups = "drop"
+  )
+
+floor_area_composition <- comparison_period %>%
+  filter(!is.na(FLOOR_AREA_SQM)) %>%
+  group_by(Window) %>%
+  summarise(
+    Records = n(),
+    Q1_sqm = quantile(FLOOR_AREA_SQM, 0.25),
+    Median_sqm = median(FLOOR_AREA_SQM),
+    Q3_sqm = quantile(FLOOR_AREA_SQM, 0.75),
+    Mean_sqm = mean(FLOOR_AREA_SQM),
+    .groups = "drop"
+  )
+names(floor_area_composition) <- c(
+  "Window", "Records", "Q1 (sqm)", "Median (sqm)", "Q3 (sqm)", "Mean (sqm)"
+)
 
 flat_type_summary <- eda %>%
   filter(!is.na(flat_type_std), !is.na(MONTHLY_RENT)) %>%
@@ -331,6 +479,70 @@ p <- ggplot(eda, aes(factor(approval_month, levels = 1:12), MONTHLY_RENT)) +
   labs(title = "Rent distribution by calendar month", subtitle = "Pooled across years; year trend may confound apparent seasonality", x = "Calendar month", y = "Monthly rent")
 save_plot(p, "12_calendar_month_rent.png")
 
+# Figure 13: town x quarter temporal-location interaction.
+p <- ggplot(
+  town_quarter,
+  aes(
+    factor(approval_quarter, levels = quarter_levels),
+    factor(town_std, levels = rev(town_order_latest)),
+    fill = median_rent
+  )
+) +
+  geom_tile(color = "white", linewidth = 0.2) +
+  scale_fill_gradient(low = "#edf6f9", high = "#ae2012", labels = label_dollar(prefix = "SGD ")) +
+  labs(
+    title = "Median monthly rent by town and approval quarter",
+    subtitle = paste0("Towns ordered by median rent in the latest quarter (", latest_quarter, ")"),
+    x = "Approval quarter", y = "Town", fill = "Median rent"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+save_plot(p, "13_town_quarter_median_rent_heatmap.png", width = 12, height = 9)
+
+# Figure 14: quarterly flat-type composition.
+p <- flat_type_quarter_share %>%
+  filter(flat_type_std %in% major_flat_types) %>%
+  ggplot(aes(approval_quarter_date, share, color = flat_type_std)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 1.5) +
+  scale_y_continuous(labels = label_percent(accuracy = 1)) +
+  labs(
+    title = "Quarterly record share by major flat type",
+    subtitle = "Five most common flat types in the full training dataset",
+    x = NULL, y = "Share of records", color = "Flat type"
+  ) +
+  theme(legend.position = "bottom")
+save_plot(p, "14_flat_type_share_by_quarter.png", width = 11, height = 7)
+
+# Figure 15: quarterly representation of the ten largest towns.
+p <- town_quarter_share %>%
+  filter(town_std %in% largest_towns) %>%
+  ggplot(aes(
+    factor(approval_quarter, levels = quarter_levels),
+    factor(town_std, levels = rev(largest_towns)),
+    fill = share
+  )) +
+  geom_tile(color = "white", linewidth = 0.25) +
+  scale_fill_gradient(low = "#edf6f9", high = "#326891", labels = label_percent(accuracy = 0.1)) +
+  labs(
+    title = "Quarterly representation of the ten largest towns",
+    subtitle = "Cell colour shows each town's share of all records in that quarter",
+    x = "Approval quarter", y = "Town", fill = "Record share"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+save_plot(p, "15_largest_town_share_heatmap.png", width = 12, height = 6.5)
+
+# Figure 16: quarterly floor-area composition.
+p <- ggplot(floor_area_quarter, aes(approval_quarter_date, median_area)) +
+  geom_ribbon(aes(ymin = q1_area, ymax = q3_area), fill = "#8ecae6", alpha = 0.35) +
+  geom_line(color = "#326891", linewidth = 1) +
+  geom_point(color = "#326891", size = 1.6) +
+  labs(
+    title = "Floor-area distribution by approval quarter",
+    subtitle = "Line: median; shaded band: interquartile range",
+    x = NULL, y = "Floor area (sqm)"
+  )
+save_plot(p, "16_floor_area_composition_by_quarter.png", width = 11, height = 6)
+
 area_spearman <- cor(eda$FLOOR_AREA_SQM, eda$MONTHLY_RENT, method = "spearman", use = "complete.obs")
 age_spearman <- cor(eda$flat_age, eda$MONTHLY_RENT, method = "spearman", use = "complete.obs")
 first_six <- head(monthly, 6)
@@ -345,6 +557,23 @@ month_count_max <- max(monthly$records)
 date_min <- min(monthly$approval_date)
 date_max <- max(monthly$approval_date)
 validation_start <- seq(date_max, by = "-5 months", length.out = 2)[2]
+town_change_median <- median(town_temporal_summary$Percentage_change_pct)
+town_change_q1 <- unname(quantile(town_temporal_summary$Percentage_change_pct, 0.25))
+town_change_q3 <- unname(quantile(town_temporal_summary$Percentage_change_pct, 0.75))
+towns_within_10pp <- sum(abs(town_temporal_summary$Percentage_change_pct - town_change_median) <= 10)
+fastest_towns <- town_temporal_summary %>% arrange(desc(Percentage_change_pct)) %>% head(2)
+slowest_towns <- town_temporal_summary %>% arrange(Percentage_change_pct) %>% head(2)
+composition_rent_early <- median(
+  comparison_period$MONTHLY_RENT[comparison_period$Window == "Early"], na.rm = TRUE
+)
+composition_rent_late <- median(
+  comparison_period$MONTHLY_RENT[comparison_period$Window == "Late"], na.rm = TRUE
+)
+composition_rent_change_pct <- 100 * (composition_rent_late / composition_rent_early - 1)
+largest_flat_shift <- flat_type_composition_change %>% slice_head(n = 1)
+largest_town_shift <- town_composition_change %>% slice_head(n = 1)
+floor_median_early <- floor_area_composition[["Median (sqm)"]][floor_area_composition$Window == "Early"]
+floor_median_late <- floor_area_composition[["Median (sqm)"]][floor_area_composition$Window == "Late"]
 
 report <- c(
   "# HDB Rental Data Analysis",
@@ -364,6 +593,10 @@ report <- c(
   paste0("The observed approval period is **", format(date_min, "%Y-%m"), " to ", format(date_max, "%Y-%m"), "**, covering **", nrow(monthly), " months**."),
   "",
   md_table(column_overview),
+  "",
+  "### Task framing",
+  "",
+  "This is a supervised tabular regression problem with property, location and temporal predictors. Individual flats cannot be tracked reliably across periods because the data lack a unique unit identifier. Time should therefore be modelled as a predictor, but the task should not be framed as pure time-series forecasting.",
   "",
   "### Interpretation",
   "",
@@ -411,7 +644,7 @@ report <- c(
   "",
   "### Observation and modelling implication",
   "",
-  paste0("The median rent in the last six observed months is **", fmt_pct(trend_change), "** different from the first six observed months. Monthly record counts range from **", fmt_num(month_count_min), "** to **", fmt_num(month_count_max), "**. The time trend is material enough that random train-validation splitting would mix earlier and later market regimes. Calendar-month differences remain descriptive because pooling years can confound seasonality with the long-term trend."),
+  paste0("The median rent in the last six observed months is **", fmt_pct(trend_change), "** different from the first six observed months. Monthly record counts range from **", fmt_num(month_count_min), "** to **", fmt_num(month_count_max), "**. The strong temporal variation means approval time should be modelled explicitly. Standard random splitting or K-fold cross-validation remains appropriate for general model comparison, while a temporal holdout provides an additional robustness check for sensitivity to time-related distribution shift. Calendar-month differences remain descriptive because pooling years can confound seasonality with the long-term trend."),
   "",
   "## 6. Property features and rent",
   "",
@@ -493,13 +726,67 @@ report <- c(
   "",
   "Flat type and floor area overlap strongly, but variation within flat types shows that they should not be treated as identical information at the EDA stage.",
   "",
-  "## 10. Validation recommendation",
+  "## 10. Temporal-location analysis",
   "",
-  paste0("Use a primary temporal holdout of the final six months: **", format(validation_start, "%Y-%m"), " to ", format(date_max, "%Y-%m"), "**. Train only on earlier records."),
+  paste0("This section treats approval time as one dimension of a cross-sectional rental dataset, not as a standalone time series. `approval_quarter` is derived in memory from `RENT_APPROVAL_DATE`. Town labels use the same lower-case, whitespace-normalised convention as the existing EDA."),
   "",
-  "Add two earlier six-month rolling backtests if computation permits. Compare models primarily on the competition metric and report MAE as a secondary diagnostic. Also break errors down by month, town, flat type and rent band. Do not calculate location target aggregates using validation rows.",
+  img("13_town_quarter_median_rent_heatmap.png", "Median monthly rent by town and approval quarter"),
   "",
-  "## 11. Prioritised findings and next experiments",
+  paste0("The comparison windows are the first six observed months (**", early_period_label, "**) and the last six observed months (**", late_period_label, "**). The heatmap orders towns by their median rent in the latest observed quarter (**", latest_quarter, "**)."),
+  "",
+  md_table(town_temporal_summary_display, digits = 1),
+  "",
+  "### Interpretation",
+  "",
+  paste0("Most towns show similar temporal rent increases. All **", nrow(town_temporal_summary), " towns** have a higher median in the late six-month window. The median town-level increase is **", round(town_change_median, 1), "%**, the middle 50% of towns lie between **", round(town_change_q1, 1), "% and ", round(town_change_q3, 1), "%**, and **", towns_within_10pp, " of ", nrow(town_temporal_summary), " towns** are within 10 percentage points of the median increase."),
+  "",
+  paste0("There are still noticeably different trajectories. `", fastest_towns$TOWN[1], "` (**", round(fastest_towns$Percentage_change_pct[1], 1), "%**) and `", fastest_towns$TOWN[2], "` (**", round(fastest_towns$Percentage_change_pct[2], 1), "%**) rose fastest, while `", slowest_towns$TOWN[1], "` (**", round(slowest_towns$Percentage_change_pct[1], 1), "%**) and `", slowest_towns$TOWN[2], "` (**", round(slowest_towns$Percentage_change_pct[2], 1), "%**) rose slowest."),
+  "",
+  "The common upward movement suggests a strong overall time effect, while the spread and quarter-to-quarter differences across towns suggest a possible time-by-location interaction. This is descriptive evidence rather than a causal or pure time-series conclusion: changing mixes of flat type, floor area, model and other property attributes within each town and period may explain part of the divergence. A multivariate model should therefore test a time-by-town interaction and compare it with a model containing only additive time and town effects.",
+  "",
+  "## 11. Temporal composition analysis",
+  "",
+  paste0("This section compares the composition of rental records across approval quarters and between the same six-month windows used above: **", early_period_label, "** and **", late_period_label, "**. The pooled median monthly rent rose from **", fmt_money(composition_rent_early), "** to **", fmt_money(composition_rent_late), "** (**", round(composition_rent_change_pct, 1), "%**). The diagnostics below assess whether changes in observed property mix are large enough to plausibly account for most of that difference."),
+  "",
+  "For categorical variables, total-variation distance is half the sum of the absolute category-share changes. It can be read as the percentage of records that would need to move between categories to make the two distributions match.",
+  "",
+  "### Flat-type composition",
+  "",
+  img("14_flat_type_share_by_quarter.png", "Quarterly record share by major flat type"),
+  "",
+  md_table(flat_type_composition_display, digits = 2),
+  "",
+  paste0("The flat-type composition total-variation distance is **", round(flat_type_tvd_pp, 1), " percentage points**. The largest individual shift is for `", largest_flat_shift$flat_type_std, "`, changing by **", round(largest_flat_shift$Share_change_pp, 1), " percentage points**. This is a modest shift relative to the rent increase."),
+  "",
+  "### Town composition",
+  "",
+  img("15_largest_town_share_heatmap.png", "Quarterly representation of the ten largest towns"),
+  "",
+  "The heatmap is limited to the ten towns with the most records in the full training dataset. The table lists the ten largest early-to-late share changes across all 26 towns.",
+  "",
+  md_table(town_composition_display, digits = 2),
+  "",
+  paste0("The town composition total-variation distance is **", round(town_tvd_pp, 1), " percentage points**. The largest individual town shift is `", largest_town_shift$town_std, "` at **", round(largest_town_shift$Share_change_pp, 2), " percentage points**, indicating relatively stable geographic representation."),
+  "",
+  "### Floor-area composition",
+  "",
+  img("16_floor_area_composition_by_quarter.png", "Floor-area distribution by approval quarter"),
+  "",
+  md_table(floor_area_composition, digits = 1),
+  "",
+  paste0("Median floor area changed from **", floor_median_early, " sqm** to **", floor_median_late, " sqm**. The interquartile range also moved slightly downward rather than toward systematically larger flats."),
+  "",
+  "### Progress-report interpretation",
+  "",
+  paste0("The observed **", round(composition_rent_change_pct, 1), "%** increase in pooled median rent is unlikely to be explained mainly by changes in the mix of records. Town representation is highly stable, median floor area falls by **", floor_median_early - floor_median_late, " sqm**, and the clearest categorical shift is only a modest change in flat-type shares. Flat type shows the largest composition movement: five-room flats lose share while two-room and three-room flats gain share. That movement is toward smaller flat types, so it does not provide an obvious compositional explanation for higher rents. These are descriptive diagnostics, not causal estimates; unmeasured or finer-grained changes in property composition may still contribute to the observed trend."),
+  "",
+  "## 12. Validation recommendation",
+  "",
+  "Treat the task primarily as supervised tabular regression with both cross-sectional and temporal dimensions. Use a standard random train-validation split or K-fold cross-validation as the main framework for general model comparison; the chronological ordering of the supplied split does not by itself make this a pure time-series forecasting task.",
+  "",
+  paste0("Add a holdout of the final six months (**", format(validation_start, "%Y-%m"), " to ", format(date_max, "%Y-%m"), "**) and, if computation permits, earlier rolling temporal checks as robustness analyses. These checks measure sensitivity to time-related distribution shift, not an assumption that the observations form a pure time series. Compare models primarily on the competition metric and report MAE as a secondary diagnostic, with errors broken down by month, town, flat type and rent band. Fit target encoding and every other target-derived aggregate using only the training portion of each split or fold, then apply the fitted mapping to validation records."),
+  "",
+  "## 13. Prioritised findings and next experiments",
   "",
   "1. Time must be modelled explicitly because the dataset spans multiple market regimes.",
   "2. Town, flat type and floor area are the first core predictors to test.",
@@ -509,7 +796,7 @@ report <- c(
   "6. Add auxiliary sources through separate ablation experiments: HDB block attributes, MRT, malls, schools, and only then macro variables.",
   "7. Preserve high-rent observations unless a documented data error is identified; analyse their errors separately because RMSE weights them heavily.",
   "",
-  "## 12. Analysis limitations",
+  "## 14. Analysis limitations",
   "",
   "- All relationships are descriptive and do not establish causality.",
   "- Repeated records cannot be classified as erroneous without a transaction identifier or additional documentation.",
@@ -517,18 +804,18 @@ report <- c(
   "- `FEE` remains semantically unresolved.",
   "- External geographic and macro datasets were intentionally excluded from this first analysis.",
   "",
-  "## 13. Reproducibility and source integrity",
+  "## 15. Reproducibility and source integrity",
   "",
-  paste0("Generated by `scripts/run_eda.R` from `data/train.csv`. Source-file hashes were checked before and after execution. Report generated at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), ".")
+  paste0("Generated by `scripts/run_eda.R` from `data/train.csv`. The source dataset hash was checked before and after execution. Report generated at ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), ".")
 )
 
 writeLines(report, report_path, useBytes = TRUE)
 
-hash_after <- tools::md5sum(source_files)
+hash_after <- tools::md5sum(train_path)
 if (!identical(unname(hash_before), unname(hash_after))) {
-  stop("Source integrity check failed: at least one file under data/ changed during analysis.")
+  stop("Source integrity check failed: data/train.csv changed during analysis.")
 }
 
 cat("Report:", report_path, "\n")
 cat("Figures:", length(list.files(fig_dir, pattern = "\\.png$")), "\n")
-cat("Source files verified unchanged:", length(source_files), "\n")
+cat("Source dataset verified unchanged:", train_path, "\n")
