@@ -68,9 +68,9 @@ the shared baseline definition.
 - Training: 2021-01 through 2024-04.
 - Validation: 2024-05 through 2025-03.
 - The split uses `RENT_APPROVAL_DATE`, never random sampling.
-- All 150,000 training CSV rows are retained in original order and with original
-  index labels. Exact duplicates are intentionally kept because flat unit numbers
-  are unavailable.
+- Listing labels are normalized before exact duplicates are removed, matching
+  `scripts/cleaning.ipynb`. This reduces the 150,000 raw rows to 149,359 cleaned
+  rows and resets the cleaned index while preserving the order of retained rows.
 - `test.csv` is not loaded by `load_data` and is not used for training or
   validation.
 - Metrics are RMSE, MAE, R², and Mean Error (`prediction - actual`).
@@ -81,9 +81,9 @@ The original baseline reads raw files from Colab's `/content`, uppercases its tw
 categorical features, and derives its cutoff from the last 20% of observed
 months. The shared framework instead applies the listing rules from
 `cleaning.ipynb` (lowercase/trim/collapse whitespace and normalized flat type),
-drops the constant `FURNISHED` and `FEE` columns, keeps duplicates, uses explicit
-date boundaries, treats negative `flat_age` as missing, and reports Mean Error in
-addition to the original three metrics.
+drops the constant `FURNISHED` and `FEE` columns, removes exact duplicates after
+label normalization, uses explicit date boundaries, treats negative `flat_age`
+as missing, and reports Mean Error in addition to the original three metrics.
 
 The old `data_transformation.ipynb` tries to execute a missing
 `preprocessing.ipynb`. The shared framework does not execute or depend on any
@@ -127,7 +127,7 @@ y_train = train_df["MONTHLY_RENT"]
 y_valid = valid_df["MONTHLY_RENT"]
 ```
 
-This gives every member the same 117,988 training rows and 32,012 validation
+This gives every member the same 117,777 training rows and 31,582 validation
 rows. Do not load `test.csv`, shuffle the rows, or create another split for these
 experiments.
 
@@ -183,13 +183,27 @@ or mappings must be fitted on training data only.
 
 ### 5. Auxiliary-data experiments
 
-Call `load_data` first, then enrich the two partitions separately:
+The auxiliary cleaning functions from `scripts/cleaning.ipynb` are available in
+`src.cleaning`. Clean the source tables once, then call `load_data` and enrich
+the two listing partitions separately:
 
 ```python
+import pandas as pd
+
+from src.cleaning import clean_auxiliary
+
+auxiliary = clean_auxiliary(
+    pd.read_csv("data/auxiliary/sg-hdb-block.csv"),
+    pd.read_csv("data/auxiliary/sg-mrt-stations.csv"),
+    pd.read_csv("data/auxiliary/sg-schools.csv"),
+    pd.read_csv("data/auxiliary/sg-shopping-malls.csv"),
+    pd.read_csv("data/auxiliary/sg-coe-prices.csv"),
+)
+
 train_df, valid_df = load_data()
 
-train_enriched = add_auxiliary_data(train_df)
-valid_enriched = add_auxiliary_data(valid_df)
+train_enriched = add_auxiliary_data(train_df, auxiliary)
+valid_enriched = add_auxiliary_data(valid_df, auxiliary)
 ```
 
 Preserve the listing index and row order during joins. Check that each enriched

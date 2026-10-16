@@ -51,7 +51,7 @@ def temporal_train_valid_split(
 def load_data(
     train_path: str | Path = DEFAULT_TRAIN_PATH,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Read train.csv, apply shared cleaning, and return train/validation rows."""
+    """Read train.csv, clean/deduplicate it, and return train/validation rows."""
     raw = pd.read_csv(Path(train_path))
-    cleaned = clean_listings(raw)
+    cleaned = clean_listings(raw, drop_exact_duplicates=True)
     return temporal_train_valid_split(cleaned)
