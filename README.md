@@ -1,8 +1,8 @@
 # CS5228 HDB Rental Price Prediction
 
 This repository has a small shared experiment framework for comparable model
-results. It uses one cleaning policy, five baseline features, one fixed temporal
-split, and one set of evaluation metrics. The raw CSV files and the original
+results. It uses one cleaning policy, one shared feature pipeline, one fixed
+temporal split, and one set of evaluation metrics. The raw CSV files and the original
 notebooks are not modified.
 
 ## Setup
@@ -23,45 +23,51 @@ root.
 
 ## Shared workflow
 
+The call chain is
+
+```text
+load_data -> make_listing -> [load_auxiliary -> make_auxiliary -> attach_auxiliary]
+          -> [scale_numerical] -> [onehot_encoding] -> encode_high_card
+```
+
 ```python
 from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import Pipeline
 
 from src.evaluation import evaluate
-from src.features import make_features, make_preprocessor
+from src.features import encode_high_card, make_listing, onehot_encoding, scale_numerical
 from src.validation import load_data
 
 train_df, valid_df = load_data()
-X_train = make_features(train_df)
-X_valid = make_features(valid_df)
+X_train = make_listing(train_df)
+X_valid = make_listing(valid_df)
 y_train = train_df["MONTHLY_RENT"]
 y_valid = valid_df["MONTHLY_RENT"]
 
-experiment = Pipeline([
-    ("preprocess", make_preprocessor()),
-    ("model", LinearRegression()),
-])
-experiment.fit(X_train, y_train)
-predictions = experiment.predict(X_valid)
+X_fit, X_eval = scale_numerical(X_train, X_valid)
+X_fit, X_eval = onehot_encoding(X_fit, X_eval)
+X_fit, X_eval = encode_high_card(X_fit, X_eval, method="ordinal")
+
+model = LinearRegression().fit(X_fit, y_train)
+predictions = model.predict(X_eval)
 metrics = evaluate(y_valid, predictions)
 ```
 
-Putting preprocessing and the model in one Pipeline is important: `fit` learns
-the numeric medians, scaling statistics, and one-hot categories from training
-rows only. Validation rows are only passed to `predict`/`transform`.
+`make_listing` is deterministic. It turns `RENT_APPROVAL_DATE` and
+`LEASE_COMMENCE_DATE` into `month_index` and `flat_age`, and keeps
+`FLOOR_AREA_SQM`, `TOWN`, `FLAT_TYPE`, `FLAT_MODEL`, `BLOCK`, and `STREET`.
 
-`make_features` is deterministic and always returns exactly:
+`scale_numerical`, `onehot_encoding`, `ordinal_encoding`, and `encode_high_card`
+learn statistics, so each takes the training frame first and any number of
+frames to transform with it (`f(X_train, X_valid, X_test)`). They are fitted on
+the first frame only.
 
-1. `floor_area_sqm`
-2. `flat_age`
-3. `month_index`
-4. `TOWN`
-5. `FLAT_TYPE`
+- Linear / Ridge: `scale_numerical` + `onehot_encoding` + `encode_high_card`.
+- Tree and boosting models: no scaling; low-card columns use `ordinal_encoding`
+  instead of one-hot, high-card columns use `encode_high_card`.
 
-For a model comparison, replace only the `model` step. For feature experiments,
-start with `make_features`, add columns in the experiment notebook, and pass the
-extended numeric/categorical column lists to `make_preprocessor`; do not change
-the shared baseline definition.
+`encode_high_card` currently supports `method="ordinal"`; new high-cardinality
+encodings are registered in `_HIGH_CARD_ENCODERS` in `src/features.py`.
+Auxiliary columns are described in `analysis/feature_engineering_zh.md`.
 
 ## Fixed experiment policy
 
@@ -116,13 +122,13 @@ Every experiment should begin with:
 
 ```python
 from src.evaluation import evaluate
-from src.features import make_features, make_preprocessor
+from src.features import make_listing
 from src.validation import load_data
 
 train_df, valid_df = load_data()
 
-X_train = make_features(train_df)
-X_valid = make_features(valid_df)
+X_train = make_listing(train_df)
+X_valid = make_listing(valid_df)
 y_train = train_df["MONTHLY_RENT"]
 y_valid = valid_df["MONTHLY_RENT"]
 ```
@@ -133,17 +139,15 @@ experiments.
 
 ### 3. Model comparison experiments
 
-Keep the shared features and preprocessor unchanged. Replace only the final
-model in the Pipeline:
+Keep the shared features and encoders unchanged. Replace only the model
+(`experiments/model_comparison.ipynb` is the listing-only reference):
 
 ```python
-experiment = Pipeline([
-    ("preprocess", make_preprocessor()),
-    ("model", YourModel()),
-])
+X_fit, X_eval = ordinal_encoding(X_train, X_valid, columns=feature_groups(X_train)[1])
+X_fit, X_eval = encode_high_card(X_fit, X_eval, method="ordinal")
 
-experiment.fit(X_train, y_train)
-predictions = experiment.predict(X_valid)
+model = YourModel().fit(X_fit, y_train)
+predictions = model.predict(X_eval)
 metrics = evaluate(y_valid, predictions)
 ```
 
@@ -152,29 +156,22 @@ name and all non-default parameters.
 
 ### 4. Feature engineering experiments
 
-Do not change the shared `make_features` function. Add experimental columns in
-the member's own notebook and pass the extended column lists to
-`make_preprocessor`:
+Do not change the shared `make_listing` function. Add experimental columns in
+the member's own notebook and pass them to the encoders explicitly with
+`columns=` (columns outside `NUMERIC_FEATURES` / `LOW_CARD_FEATURES` /
+`HIGH_CARD_FEATURES` are not picked up by default):
 
 ```python
-X_train = make_features(train_df)
-X_valid = make_features(valid_df)
+X_train = make_listing(train_df)
+X_valid = make_listing(valid_df)
 
 X_train["new_numeric_feature"] = ...
 X_valid["new_numeric_feature"] = ...
 
-numeric_features = [
-    "floor_area_sqm",
-    "flat_age",
-    "month_index",
-    "new_numeric_feature",
-]
-categorical_features = ["TOWN", "FLAT_TYPE"]
-
-experiment = Pipeline([
-    ("preprocess", make_preprocessor(numeric_features, categorical_features)),
-    ("model", YourModel()),
-])
+numeric, low_card, high_card = feature_groups(X_train)
+X_fit, X_eval = scale_numerical(
+    X_train, X_valid, columns=numeric + ["new_numeric_feature"]
+)
 ```
 
 Deterministic transformations can be applied separately to training and
@@ -183,28 +180,31 @@ or mappings must be fitted on training data only.
 
 ### 5. Auxiliary-data experiments
 
-The auxiliary cleaning functions from `scripts/cleaning.ipynb` are available in
-`src.cleaning`. Clean the source tables once, then call `load_data` and enrich
-the two listing partitions separately:
+`load_auxiliary` reads and cleans the six auxiliary CSVs. `make_auxiliary` turns
+them into join-ready tables, and `attach_auxiliary` joins whichever tables are in
+the dict it receives, so a table-level ablation is just a smaller dict
+(`experiments/example_joined.ipynb`):
 
 ```python
-import pandas as pd
+from src.auxiliary import attach_auxiliary, load_auxiliary
+from src.features import make_auxiliary, order_features
 
-from src.cleaning import clean_auxiliary
-
-auxiliary = clean_auxiliary(
-    pd.read_csv("data/auxiliary/sg-hdb-block.csv"),
-    pd.read_csv("data/auxiliary/sg-mrt-stations.csv"),
-    pd.read_csv("data/auxiliary/sg-schools.csv"),
-    pd.read_csv("data/auxiliary/sg-shopping-malls.csv"),
-    pd.read_csv("data/auxiliary/sg-coe-prices.csv"),
+raw = load_auxiliary()
+auxiliary = make_auxiliary(
+    df_coe=raw["coe"],
+    df_mrt=raw["mrt"],
+    df_schools=raw["schools"],
+    df_hdb=raw["hdb"],
+    df_malls=raw["malls"],
+    df_stock=raw["stock"],
 )
 
-train_df, valid_df = load_data()
-
-train_enriched = add_auxiliary_data(train_df, auxiliary)
-valid_enriched = add_auxiliary_data(valid_df, auxiliary)
+X_train = order_features(attach_auxiliary(make_listing(train_df), auxiliary))
+X_valid = order_features(attach_auxiliary(make_listing(valid_df), auxiliary))
 ```
+
+MRT, schools, and malls need the coordinates from the HDB table, so they can
+only be attached together with `"hdb"`.
 
 Preserve the listing index and row order during joins. Check that each enriched
 table has the same number of rows and the same index as its input before fitting
@@ -234,14 +234,15 @@ Each experiment notebook should report:
 print("Training rows:", len(X_train))
 print("Validation rows:", len(X_valid))
 print("Features:", list(X_train.columns))
-print("Model:", experiment.named_steps["model"])
+print("Model:", model)
 print("Metrics:", evaluate(y_valid, predictions))
 ```
 
 Before sharing a result, confirm that:
 
 - training and validation indices still match their targets;
-- preprocessing was fitted through `experiment.fit(X_train, y_train)` only;
+- encoders and scalers were fitted on the training frame only (it is the
+  first argument);
 - all predictions and all four metric values are finite;
 - the notebook records the model settings and any additional features;
 - the shared files under `src/` were not changed solely for one experiment.
