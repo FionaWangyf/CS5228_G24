@@ -61,9 +61,10 @@ learn statistics, so each takes the training frame first and any number of
 frames to transform with it (`f(X_train, X_valid, X_test)`). They are fitted on
 the first frame only.
 
-- Linear / Ridge: `scale_numerical` + `onehot_encoding` + `encode_high_card`.
-- Tree and boosting models: no scaling; low-card columns use `ordinal_encoding`
-  instead of one-hot, high-card columns use `encode_high_card`.
+- All models: `onehot_encoding` for low-card columns and `encode_high_card` for
+  high-card columns.
+- Linear / Ridge additionally call `scale_numerical` first; tree and boosting
+  models do not need scaling.
 
 `encode_high_card` currently supports `method="ordinal"`; new high-cardinality
 encodings are registered in `_HIGH_CARD_ENCODERS` in `src/features.py`.
@@ -143,7 +144,7 @@ Keep the shared features and encoders unchanged. Replace only the model
 (`experiments/model_comparison.ipynb` is the listing-only reference):
 
 ```python
-X_fit, X_eval = ordinal_encoding(X_train, X_valid, columns=feature_groups(X_train)[1])
+X_fit, X_eval = onehot_encoding(X_train, X_valid)
 X_fit, X_eval = encode_high_card(X_fit, X_eval, method="ordinal")
 
 model = YourModel().fit(X_fit, y_train)
@@ -183,7 +184,7 @@ or mappings must be fitted on training data only.
 `load_auxiliary` reads and cleans the six auxiliary CSVs. `make_auxiliary` turns
 them into join-ready tables, and `attach_auxiliary` joins whichever tables are in
 the dict it receives, so a table-level ablation is just a smaller dict
-(`experiments/example_joined.ipynb`):
+(`experiments/example_attach.ipynb`):
 
 ```python
 from src.auxiliary import attach_auxiliary, load_auxiliary
