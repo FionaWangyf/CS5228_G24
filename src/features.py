@@ -208,7 +208,45 @@ def ordinal_encoding(
     )
 
 
-_HIGH_CARD_ENCODERS = {"ordinal": ordinal_encoding}
+def frequency_encoding(
+    X_train: pd.DataFrame, *X_others: pd.DataFrame, columns: list[str] | None = None
+) -> tuple[pd.DataFrame, ...]:
+    """Training-row proportions; unseen categories have frequency zero."""
+    columns = feature_groups(X_train)[2] if columns is None else columns
+    filled = _fill_categories(X_train, columns)
+    mappings = {c: filled[c].value_counts(normalize=True) for c in columns}
+    return tuple(
+        X.assign(**{
+            c: _fill_categories(X, columns)[c].map(mappings[c]).fillna(0.0).astype(float)
+            for c in columns
+        })
+        for X in (X_train, *X_others)
+    )
+
+
+def native_categorical_encoding(
+    X_train: pd.DataFrame, *X_others: pd.DataFrame, columns: list[str] | None = None
+) -> tuple[pd.DataFrame, ...]:
+    """Unordered pandas categories fitted on training only; unseen values are NaN.
+
+    LightGBM auto-detects these dtypes. Numeric ordinal codes remain ordinary
+    numeric columns and do not use this categorical split mechanism.
+    """
+    columns = feature_groups(X_train)[2] if columns is None else columns
+    filled = _fill_categories(X_train, columns)
+    dtypes = {c: pd.CategoricalDtype(categories=sorted(filled[c].unique()), ordered=False)
+              for c in columns}
+    return tuple(
+        X.assign(**{c: _fill_categories(X, columns)[c].astype(dtypes[c]) for c in columns})
+        for X in (X_train, *X_others)
+    )
+
+
+_HIGH_CARD_ENCODERS = {
+    "ordinal": ordinal_encoding,
+    "frequency": frequency_encoding,
+    "native": native_categorical_encoding,
+}
 
 
 def encode_high_card(

@@ -1,0 +1,4 @@
+{
+  "method": "ordinal",
+  "selection": "Lowest validation RMSE on E2.5; fixed for all E2 and future E3."
+}

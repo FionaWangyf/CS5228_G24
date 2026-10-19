@@ -1,5 +1,10 @@
 # CS5228 HDB Rental Price Prediction
 
+Feature engineering experiments and diagnostics are organized under
+[`experiments/feature_engineering/`](experiments/feature_engineering/README.md).
+See the [consolidated results analysis](analysis/feature_engineering_results_zh.md)
+for the final E2/E3 interpretation, incremental auxiliary results, and limitations.
+
 This repository has a small shared experiment framework for comparable model
 results. It uses one cleaning policy, one shared feature pipeline, one fixed
 temporal split, and one set of evaluation metrics. The raw CSV files and the original

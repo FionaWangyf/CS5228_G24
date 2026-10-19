@@ -1,0 +1,4 @@
+feature,train_unique,validation_unique,train_min,train_max,validation_min,validation_max,validation_outside_train_range_pct
+month_index,40,11,0.0,39.0,40.0,50.0,100.0
+coe_sum,39,11,175248.0,493348.5,362059.5,407619.5,0.0
+stock_index,39,11,1.0,1.1567262397650473,1.1336876892842025,1.2738115718549365,70.98980431891584

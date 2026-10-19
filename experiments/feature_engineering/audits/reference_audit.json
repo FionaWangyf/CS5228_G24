@@ -1,0 +1,15 @@
+{
+  "notebook_rmse": 480.6,
+  "csv_rmse": 483.0913728290935,
+  "reproduced_rmse": 480.60034889314807,
+  "notebook_match_2dp": true,
+  "csv_match": false,
+  "python": "3.13.7",
+  "versions": {
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.6.1",
+    "lightgbm": "4.6.0"
+  },
+  "train_file_sha256": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6"
+}
