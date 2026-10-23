@@ -1,0 +1,3 @@
+# Install after the repository-root requirements.txt.
+# ipykernel and JupyterLab are already pinned there.
+matplotlib==3.11.1

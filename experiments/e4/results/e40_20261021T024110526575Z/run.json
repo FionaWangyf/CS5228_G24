@@ -1,0 +1,152 @@
+{
+  "experiment": "E4.0",
+  "explicit_time_features": [
+    "month_index"
+  ],
+  "features": [
+    "floor_area_sqm",
+    "flat_age",
+    "month_index",
+    "TOWN",
+    "FLAT_TYPE"
+  ],
+  "numeric_features": [
+    "floor_area_sqm",
+    "flat_age",
+    "month_index"
+  ],
+  "categorical_features": [
+    "TOWN",
+    "FLAT_TYPE"
+  ],
+  "train_rows": 117777,
+  "validation_rows": 31582,
+  "train_period": [
+    "2021-01",
+    "2024-04"
+  ],
+  "validation_period": [
+    "2024-05",
+    "2025-03"
+  ],
+  "train_month_index_range": [
+    0,
+    39
+  ],
+  "validation_month_index_range": [
+    40,
+    50
+  ],
+  "python": "3.12.10",
+  "environment": "project .venv",
+  "versions": {
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.6.1",
+    "lightgbm": "4.6.0",
+    "matplotlib": "3.11.1",
+    "ipykernel": "6.29.5"
+  },
+  "shared_signatures": {
+    "load_data": "(train_path: 'str | Path' = PosixPath('<PROJECT_ROOT>/data/train.csv')) -> 'tuple[pd.DataFrame, pd.DataFrame]'",
+    "make_features": "(df: 'pd.DataFrame') -> 'pd.DataFrame'",
+    "make_preprocessor": "(numeric_features: 'Sequence[str]' = ('floor_area_sqm', 'flat_age', 'month_index'), categorical_features: 'Sequence[str]' = ('TOWN', 'FLAT_TYPE')) -> 'ColumnTransformer'",
+    "evaluate": "(y_true, y_pred) -> 'dict[str, float]'"
+  },
+  "model_params": {
+    "boosting_type": "gbdt",
+    "class_weight": null,
+    "colsample_bytree": 1.0,
+    "importance_type": "split",
+    "learning_rate": 0.05,
+    "max_depth": -1,
+    "min_child_samples": 20,
+    "min_child_weight": 0.001,
+    "min_split_gain": 0.0,
+    "n_estimators": 500,
+    "n_jobs": -1,
+    "num_leaves": 31,
+    "objective": null,
+    "random_state": 42,
+    "reg_alpha": 0.0,
+    "reg_lambda": 0.0,
+    "subsample": 1.0,
+    "subsample_for_bin": 200000,
+    "subsample_freq": 0,
+    "verbosity": -1
+  },
+  "fit_seconds": 2.276272584043909,
+  "fit_time_includes": "preprocessing and model.fit",
+  "metrics": {
+    "RMSE": 485.3581110291496,
+    "MAE": 361.31507362077673,
+    "R2": 0.45706933762410307,
+    "Mean Error": -45.09542229378345
+  },
+  "warnings": [
+    "UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names"
+  ],
+  "checks": {
+    "expected_rows": true,
+    "chronological_months_disjoint": true,
+    "indices_disjoint": true,
+    "feature_target_alignment": true,
+    "exact_five_features": true,
+    "training_only_preprocessing_verified": true,
+    "prediction_did_not_refit": true,
+    "finite_predictions_and_metrics": true,
+    "inputs_unchanged": true,
+    "source_hashes_unchanged": true,
+    "test_data_not_loaded": true,
+    "no_validation_tuning_or_early_stopping": true
+  },
+  "source_sha256": {
+    "data/train.csv": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+    "src/cleaning.py": "7e240ba6dffcecb159a65d3a10ab7a4b658160d18a49383a1fd4b301a6e7dd60",
+    "src/validation.py": "c05319d6c3d66fe2c7065e614fa08a422a539284807d83e27b3f4f3638134265",
+    "src/features.py": "d9f017fa5d54e8453c9d95aeb7b83ce638ffbe773ea44037d62e3949bee73d68",
+    "src/evaluation.py": "ac17516efa2a3fc28dabe2c4b4297d9c4a3d85c6fc108728e4277a456c20f8cf",
+    "requirements.txt": "f0fd5c7406018157ac6dbe101544615ea577a70db9b9e74ead95bd8d2812dd8e"
+  },
+  "run_id": "e40_20261021T024110526575Z",
+  "encoded_features": [
+    "numeric__floor_area_sqm",
+    "numeric__flat_age",
+    "numeric__month_index",
+    "categorical__TOWN_bedok",
+    "categorical__TOWN_bishan",
+    "categorical__TOWN_bukit batok",
+    "categorical__TOWN_bukit merah",
+    "categorical__TOWN_bukit panjang",
+    "categorical__TOWN_bukit timah",
+    "categorical__TOWN_central",
+    "categorical__TOWN_choa chu kang",
+    "categorical__TOWN_clementi",
+    "categorical__TOWN_geylang",
+    "categorical__TOWN_hougang",
+    "categorical__TOWN_jurong east",
+    "categorical__TOWN_jurong west",
+    "categorical__TOWN_kallang/whampoa",
+    "categorical__TOWN_marine parade",
+    "categorical__TOWN_pasir ris",
+    "categorical__TOWN_punggol",
+    "categorical__TOWN_queenstown",
+    "categorical__TOWN_sembawang",
+    "categorical__TOWN_sengkang",
+    "categorical__TOWN_serangoon",
+    "categorical__TOWN_tampines",
+    "categorical__TOWN_toa payoh",
+    "categorical__TOWN_woodlands",
+    "categorical__TOWN_yishun",
+    "categorical__FLAT_TYPE_2 room",
+    "categorical__FLAT_TYPE_3 room",
+    "categorical__FLAT_TYPE_4 room",
+    "categorical__FLAT_TYPE_5 room",
+    "categorical__FLAT_TYPE_executive"
+  ],
+  "limitations": [
+    "Single previously examined temporal holdout",
+    "No hyperparameter tuning",
+    "Multithreaded runtimes are hardware dependent; tiny numerical variation may occur"
+  ]
+}
