@@ -1,0 +1,7 @@
+feature,train_categories,validation_categories,train_missing,validation_missing,unknown_validation_rows,unknown_validation_pct,median_train_rows_per_category,train_categories_with_under_20_rows,formal_encoding,used_in_encoding_comparison
+BLOCK,2699,2585,0,0,50,0.1583180292571718,19.0,1350,ordinal_numeric,True
+STREET,574,573,0,0,4,0.012665442340573744,137.0,43,ordinal_numeric,True
+SUBZONE,156,156,0,0,0,0.0,656.0,2,ordinal_numeric,False
+mrt_name,136,135,0,0,0,0.0,513.5,3,ordinal_numeric,False
+mall_name,85,85,0,0,0,0.0,982.0,2,ordinal_numeric,False
+composite_block_id,9324,8366,0,0,131,0.41479323665379014,10.0,7639,ordinal_numeric,False

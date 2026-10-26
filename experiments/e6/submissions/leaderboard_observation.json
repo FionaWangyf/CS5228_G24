@@ -1,0 +1,12 @@
+{
+  "source": "user-reported Kaggle result; not independently verified on leaderboard",
+  "submission_file": "submission_e6_C_fulltrain.csv",
+  "configuration": "C",
+  "score": 449.75063,
+  "metric": "RMSE",
+  "rank": 34,
+  "reported_first_place_score": 172.42640,
+  "leaderboard_partition": "not independently verified",
+  "external_data_policy": "User believes outside supplied files are not allowed; design follow-ups without external data",
+  "note": "The generation audit records the state before upload. This observation was received afterward."
+}

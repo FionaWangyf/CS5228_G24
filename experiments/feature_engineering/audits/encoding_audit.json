@@ -1,0 +1,35 @@
+{
+  "fair_comparison": true,
+  "categorical_dtypes": {
+    "BLOCK": "category",
+    "STREET": "category"
+  },
+  "categorical_feature_argument": [
+    "BLOCK",
+    "STREET"
+  ],
+  "effective_categorical_column": [
+    3,
+    4
+  ],
+  "pandas_category_counts": [
+    2699,
+    574
+  ],
+  "categorical_split_count": 7893,
+  "categorical_split_features": [
+    "BLOCK",
+    "STREET"
+  ],
+  "reproduced_metrics": {
+    "RMSE": 482.63496333358154,
+    "MAE": 359.68228916393923,
+    "R2": 0.46314457473841253,
+    "Mean Error": -47.31131923730856
+  },
+  "training_seconds": 2.7029961249791086,
+  "block_labels_mapping_to_multiple_addresses": 1462,
+  "block_labels_total": 2699,
+  "scope": "Comparison covers BLOCK/STREET on E2.5 only, not auxiliary categories or composite_block_id.",
+  "recommendation": "Keep official encoding unchanged. Native is implemented correctly but was worse on the tested core."
+}

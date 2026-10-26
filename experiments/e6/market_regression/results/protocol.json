@@ -1,0 +1,41 @@
+{
+  "data_sha256": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+  "script_sha256": "1d9edb18a623b9c5632ab4b5b0aba94a477b77e15f191c981896e83579c2a64e",
+  "versions": {
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.6.1",
+    "lightgbm": "4.6.0",
+    "catboost": "1.2.8"
+  },
+  "lgbm": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbosity": -1
+  },
+  "catboost": {
+    "iterations": 1000,
+    "depth": 6,
+    "learning_rate": 0.05,
+    "loss_function": "RMSE",
+    "random_seed": 42,
+    "thread_count": 4,
+    "verbose": false,
+    "allow_writing_files": false,
+    "has_time": true
+  },
+  "cleaning": "original shared cleaning only; no new outlier exclusion",
+  "address": "town/street/block group, not unique flat",
+  "sparse_onehot_min_frequency": 10,
+  "target_prior_weight": 20,
+  "trend": {
+    "hedonic_ridge_alpha": 20,
+    "recent_slope_months": 12,
+    "anchor_months": 3,
+    "damping_months": 6
+  },
+  "selection": "all choices fixed before outer validation; exploratory comparisons; no test.csv or outer labels in fitting"
+}

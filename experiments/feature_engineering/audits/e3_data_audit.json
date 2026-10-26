@@ -1,0 +1,861 @@
+{
+  "monthly_lag": 1,
+  "availability_assumption": "The previous complete calendar month is available at prediction time; exact release dates are not recorded.",
+  "geographic_policy": "Static Geographic Approximation; no historical POI reconstruction.",
+  "source_schema": {
+    "hdb": [
+      "TOWN",
+      "BLOCK",
+      "STREET",
+      "POSTAL_CODE",
+      "LATITUDE",
+      "LONGITUDE",
+      "MAX_FLOOR",
+      "YEAR_COMPLETED",
+      "SUBZONE",
+      "PLANNING_AREA",
+      "REGION"
+    ],
+    "mrt": [
+      "CODE",
+      "NAME",
+      "STATUS",
+      "LATITUDE",
+      "LONGITUDE",
+      "SUBZONE",
+      "PLANNING_AREA",
+      "REGION",
+      "IS_OPEN"
+    ],
+    "schools": [
+      "NAME",
+      "URL",
+      "STREET",
+      "POSTAL_CODE",
+      "MRT_STATIONS",
+      "BUS_LINES",
+      "PLANNING_AREA",
+      "REGION",
+      "TYPE_CODE",
+      "NATURE_CODE",
+      "SESSION_CODE",
+      "MAINLEVEL_CODE",
+      "LATITUDE",
+      "LONGITUDE",
+      "SUSPECT_DUPLICATE_COORDS"
+    ],
+    "malls": [
+      "NAME",
+      "LATITUDE",
+      "LONGITUDE"
+    ],
+    "coe": [
+      "CATEGORY",
+      "ROUND",
+      "QUOTA_PREMIUM",
+      "PREVAILING_QUOTA_PREMIUM",
+      "QUOTA",
+      "BIDS_RECEIVED",
+      "YEAR_MONTH"
+    ],
+    "stock": [
+      "NAME",
+      "SYMBOL",
+      "DATE",
+      "OPEN",
+      "HIGH",
+      "LOW",
+      "CLOSE",
+      "ADJUSTED_CLOSE",
+      "VOLUME"
+    ]
+  },
+  "raw_coe_range": [
+    "2021-01",
+    "2026-08"
+  ],
+  "raw_stock_range": [
+    "2021-01-04",
+    "2026-07-30"
+  ],
+  "stock_universe": [
+    "5E2.SI",
+    "A17U.SI",
+    "AIY.SI",
+    "AP4.SI",
+    "BN4.SI",
+    "BTM.SI",
+    "BUOU.SI",
+    "C07.SI",
+    "C09.SI",
+    "C38U.SI",
+    "C52.SI",
+    "C6L.SI",
+    "CJLU.SI",
+    "D05.SI",
+    "E5H.SI",
+    "F34.SI",
+    "G13.SI",
+    "H02.SI",
+    "H15.SI",
+    "HMN.SI",
+    "K71U.SI",
+    "M44U.SI",
+    "ME8U.SI",
+    "N2IU.SI",
+    "NS8U.SI",
+    "O39.SI",
+    "OV8.SI",
+    "P15.SI",
+    "S08.SI",
+    "S58.SI",
+    "S59.SI",
+    "S63.SI",
+    "S68.SI",
+    "T82U.SI",
+    "U06.SI",
+    "U11.SI",
+    "U14.SI",
+    "U96.SI",
+    "V03.SI",
+    "VC2.SI",
+    "Z25.SI",
+    "Z74.SI"
+  ],
+  "stock_months_missing_entire_symbol": 0,
+  "stock_missing_adjusted_close_raw_rows": 85,
+  "stock_observation_range_used": [
+    "2021-01-04",
+    "2025-02-28"
+  ],
+  "coe_source_month_range_used": [
+    "2021-01",
+    "2025-02"
+  ],
+  "monthly_source_mapping": [
+    {
+      "table": "coe",
+      "source_month_index": 0,
+      "listing_month_index": 1,
+      "source_month": "2021-01",
+      "listing_month": "2021-02"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 1,
+      "listing_month_index": 2,
+      "source_month": "2021-02",
+      "listing_month": "2021-03"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 2,
+      "listing_month_index": 3,
+      "source_month": "2021-03",
+      "listing_month": "2021-04"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 3,
+      "listing_month_index": 4,
+      "source_month": "2021-04",
+      "listing_month": "2021-05"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 4,
+      "listing_month_index": 5,
+      "source_month": "2021-05",
+      "listing_month": "2021-06"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 5,
+      "listing_month_index": 6,
+      "source_month": "2021-06",
+      "listing_month": "2021-07"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 6,
+      "listing_month_index": 7,
+      "source_month": "2021-07",
+      "listing_month": "2021-08"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 7,
+      "listing_month_index": 8,
+      "source_month": "2021-08",
+      "listing_month": "2021-09"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 8,
+      "listing_month_index": 9,
+      "source_month": "2021-09",
+      "listing_month": "2021-10"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 9,
+      "listing_month_index": 10,
+      "source_month": "2021-10",
+      "listing_month": "2021-11"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 10,
+      "listing_month_index": 11,
+      "source_month": "2021-11",
+      "listing_month": "2021-12"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 11,
+      "listing_month_index": 12,
+      "source_month": "2021-12",
+      "listing_month": "2022-01"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 12,
+      "listing_month_index": 13,
+      "source_month": "2022-01",
+      "listing_month": "2022-02"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 13,
+      "listing_month_index": 14,
+      "source_month": "2022-02",
+      "listing_month": "2022-03"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 14,
+      "listing_month_index": 15,
+      "source_month": "2022-03",
+      "listing_month": "2022-04"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 15,
+      "listing_month_index": 16,
+      "source_month": "2022-04",
+      "listing_month": "2022-05"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 16,
+      "listing_month_index": 17,
+      "source_month": "2022-05",
+      "listing_month": "2022-06"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 17,
+      "listing_month_index": 18,
+      "source_month": "2022-06",
+      "listing_month": "2022-07"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 18,
+      "listing_month_index": 19,
+      "source_month": "2022-07",
+      "listing_month": "2022-08"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 19,
+      "listing_month_index": 20,
+      "source_month": "2022-08",
+      "listing_month": "2022-09"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 20,
+      "listing_month_index": 21,
+      "source_month": "2022-09",
+      "listing_month": "2022-10"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 21,
+      "listing_month_index": 22,
+      "source_month": "2022-10",
+      "listing_month": "2022-11"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 22,
+      "listing_month_index": 23,
+      "source_month": "2022-11",
+      "listing_month": "2022-12"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 23,
+      "listing_month_index": 24,
+      "source_month": "2022-12",
+      "listing_month": "2023-01"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 24,
+      "listing_month_index": 25,
+      "source_month": "2023-01",
+      "listing_month": "2023-02"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 25,
+      "listing_month_index": 26,
+      "source_month": "2023-02",
+      "listing_month": "2023-03"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 26,
+      "listing_month_index": 27,
+      "source_month": "2023-03",
+      "listing_month": "2023-04"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 27,
+      "listing_month_index": 28,
+      "source_month": "2023-04",
+      "listing_month": "2023-05"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 28,
+      "listing_month_index": 29,
+      "source_month": "2023-05",
+      "listing_month": "2023-06"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 29,
+      "listing_month_index": 30,
+      "source_month": "2023-06",
+      "listing_month": "2023-07"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 30,
+      "listing_month_index": 31,
+      "source_month": "2023-07",
+      "listing_month": "2023-08"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 31,
+      "listing_month_index": 32,
+      "source_month": "2023-08",
+      "listing_month": "2023-09"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 32,
+      "listing_month_index": 33,
+      "source_month": "2023-09",
+      "listing_month": "2023-10"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 33,
+      "listing_month_index": 34,
+      "source_month": "2023-10",
+      "listing_month": "2023-11"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 34,
+      "listing_month_index": 35,
+      "source_month": "2023-11",
+      "listing_month": "2023-12"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 35,
+      "listing_month_index": 36,
+      "source_month": "2023-12",
+      "listing_month": "2024-01"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 36,
+      "listing_month_index": 37,
+      "source_month": "2024-01",
+      "listing_month": "2024-02"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 37,
+      "listing_month_index": 38,
+      "source_month": "2024-02",
+      "listing_month": "2024-03"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 38,
+      "listing_month_index": 39,
+      "source_month": "2024-03",
+      "listing_month": "2024-04"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 39,
+      "listing_month_index": 40,
+      "source_month": "2024-04",
+      "listing_month": "2024-05"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 40,
+      "listing_month_index": 41,
+      "source_month": "2024-05",
+      "listing_month": "2024-06"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 41,
+      "listing_month_index": 42,
+      "source_month": "2024-06",
+      "listing_month": "2024-07"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 42,
+      "listing_month_index": 43,
+      "source_month": "2024-07",
+      "listing_month": "2024-08"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 43,
+      "listing_month_index": 44,
+      "source_month": "2024-08",
+      "listing_month": "2024-09"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 44,
+      "listing_month_index": 45,
+      "source_month": "2024-09",
+      "listing_month": "2024-10"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 45,
+      "listing_month_index": 46,
+      "source_month": "2024-10",
+      "listing_month": "2024-11"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 46,
+      "listing_month_index": 47,
+      "source_month": "2024-11",
+      "listing_month": "2024-12"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 47,
+      "listing_month_index": 48,
+      "source_month": "2024-12",
+      "listing_month": "2025-01"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 48,
+      "listing_month_index": 49,
+      "source_month": "2025-01",
+      "listing_month": "2025-02"
+    },
+    {
+      "table": "coe",
+      "source_month_index": 49,
+      "listing_month_index": 50,
+      "source_month": "2025-02",
+      "listing_month": "2025-03"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 0,
+      "listing_month_index": 1,
+      "source_month": "2021-01",
+      "listing_month": "2021-02"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 1,
+      "listing_month_index": 2,
+      "source_month": "2021-02",
+      "listing_month": "2021-03"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 2,
+      "listing_month_index": 3,
+      "source_month": "2021-03",
+      "listing_month": "2021-04"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 3,
+      "listing_month_index": 4,
+      "source_month": "2021-04",
+      "listing_month": "2021-05"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 4,
+      "listing_month_index": 5,
+      "source_month": "2021-05",
+      "listing_month": "2021-06"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 5,
+      "listing_month_index": 6,
+      "source_month": "2021-06",
+      "listing_month": "2021-07"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 6,
+      "listing_month_index": 7,
+      "source_month": "2021-07",
+      "listing_month": "2021-08"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 7,
+      "listing_month_index": 8,
+      "source_month": "2021-08",
+      "listing_month": "2021-09"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 8,
+      "listing_month_index": 9,
+      "source_month": "2021-09",
+      "listing_month": "2021-10"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 9,
+      "listing_month_index": 10,
+      "source_month": "2021-10",
+      "listing_month": "2021-11"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 10,
+      "listing_month_index": 11,
+      "source_month": "2021-11",
+      "listing_month": "2021-12"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 11,
+      "listing_month_index": 12,
+      "source_month": "2021-12",
+      "listing_month": "2022-01"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 12,
+      "listing_month_index": 13,
+      "source_month": "2022-01",
+      "listing_month": "2022-02"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 13,
+      "listing_month_index": 14,
+      "source_month": "2022-02",
+      "listing_month": "2022-03"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 14,
+      "listing_month_index": 15,
+      "source_month": "2022-03",
+      "listing_month": "2022-04"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 15,
+      "listing_month_index": 16,
+      "source_month": "2022-04",
+      "listing_month": "2022-05"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 16,
+      "listing_month_index": 17,
+      "source_month": "2022-05",
+      "listing_month": "2022-06"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 17,
+      "listing_month_index": 18,
+      "source_month": "2022-06",
+      "listing_month": "2022-07"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 18,
+      "listing_month_index": 19,
+      "source_month": "2022-07",
+      "listing_month": "2022-08"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 19,
+      "listing_month_index": 20,
+      "source_month": "2022-08",
+      "listing_month": "2022-09"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 20,
+      "listing_month_index": 21,
+      "source_month": "2022-09",
+      "listing_month": "2022-10"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 21,
+      "listing_month_index": 22,
+      "source_month": "2022-10",
+      "listing_month": "2022-11"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 22,
+      "listing_month_index": 23,
+      "source_month": "2022-11",
+      "listing_month": "2022-12"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 23,
+      "listing_month_index": 24,
+      "source_month": "2022-12",
+      "listing_month": "2023-01"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 24,
+      "listing_month_index": 25,
+      "source_month": "2023-01",
+      "listing_month": "2023-02"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 25,
+      "listing_month_index": 26,
+      "source_month": "2023-02",
+      "listing_month": "2023-03"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 26,
+      "listing_month_index": 27,
+      "source_month": "2023-03",
+      "listing_month": "2023-04"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 27,
+      "listing_month_index": 28,
+      "source_month": "2023-04",
+      "listing_month": "2023-05"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 28,
+      "listing_month_index": 29,
+      "source_month": "2023-05",
+      "listing_month": "2023-06"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 29,
+      "listing_month_index": 30,
+      "source_month": "2023-06",
+      "listing_month": "2023-07"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 30,
+      "listing_month_index": 31,
+      "source_month": "2023-07",
+      "listing_month": "2023-08"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 31,
+      "listing_month_index": 32,
+      "source_month": "2023-08",
+      "listing_month": "2023-09"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 32,
+      "listing_month_index": 33,
+      "source_month": "2023-09",
+      "listing_month": "2023-10"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 33,
+      "listing_month_index": 34,
+      "source_month": "2023-10",
+      "listing_month": "2023-11"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 34,
+      "listing_month_index": 35,
+      "source_month": "2023-11",
+      "listing_month": "2023-12"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 35,
+      "listing_month_index": 36,
+      "source_month": "2023-12",
+      "listing_month": "2024-01"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 36,
+      "listing_month_index": 37,
+      "source_month": "2024-01",
+      "listing_month": "2024-02"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 37,
+      "listing_month_index": 38,
+      "source_month": "2024-02",
+      "listing_month": "2024-03"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 38,
+      "listing_month_index": 39,
+      "source_month": "2024-03",
+      "listing_month": "2024-04"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 39,
+      "listing_month_index": 40,
+      "source_month": "2024-04",
+      "listing_month": "2024-05"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 40,
+      "listing_month_index": 41,
+      "source_month": "2024-05",
+      "listing_month": "2024-06"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 41,
+      "listing_month_index": 42,
+      "source_month": "2024-06",
+      "listing_month": "2024-07"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 42,
+      "listing_month_index": 43,
+      "source_month": "2024-07",
+      "listing_month": "2024-08"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 43,
+      "listing_month_index": 44,
+      "source_month": "2024-08",
+      "listing_month": "2024-09"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 44,
+      "listing_month_index": 45,
+      "source_month": "2024-09",
+      "listing_month": "2024-10"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 45,
+      "listing_month_index": 46,
+      "source_month": "2024-10",
+      "listing_month": "2024-11"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 46,
+      "listing_month_index": 47,
+      "source_month": "2024-11",
+      "listing_month": "2024-12"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 47,
+      "listing_month_index": 48,
+      "source_month": "2024-12",
+      "listing_month": "2025-01"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 48,
+      "listing_month_index": 49,
+      "source_month": "2025-01",
+      "listing_month": "2025-02"
+    },
+    {
+      "table": "stock",
+      "source_month_index": 49,
+      "listing_month_index": 50,
+      "source_month": "2025-02",
+      "listing_month": "2025-03"
+    }
+  ],
+  "e30_vs_e25": {
+    "RMSE_difference": 5.684341886080802e-14,
+    "MAE_difference": 0.0,
+    "R2_difference": 0.0,
+    "Mean Error_difference": 0.0,
+    "max_prediction_difference": 4.547473508864641e-13,
+    "passed": true
+  },
+  "python": "3.13.7",
+  "versions": {
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.6.1",
+    "lightgbm": "4.6.0"
+  },
+  "train_file_sha256": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+  "source_hashes": {
+    "sg-coe-prices.csv": "e32fccd39da32780b6b7f35d069c813ed3edb0c110ea60761656bcee58d501a5",
+    "sg-hdb-block.csv": "e6ccc60c1f901f8f476eb6fe14c07ef5941d2afd06a081a1e4c00f717da27f83",
+    "sg-mrt-stations.csv": "899460b39fb251bd6883fffc9e6a772081f8e5217a657550afc3c49cfdcd3227",
+    "sg-schools.csv": "118c7ce8d96bbc934bd53655e73e6d0848c27853a625394ecc6a67a5af54f192",
+    "sg-shopping-malls.csv": "00e05b0176ac412695fc4ce1fc5a5338a1993593ffaffe26156dc2ea04ddf2c8",
+    "sg-stock-prices.csv": "c52fef9f33cfcb11285e2b9546124e02f32488e563af44e9fb3a505d10e2edff"
+  }
+}

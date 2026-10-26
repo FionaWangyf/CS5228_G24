@@ -1,0 +1,23 @@
+{
+  "train_month_index_range": [
+    0,
+    39
+  ],
+  "validation_month_index_range": [
+    40,
+    50
+  ],
+  "max_prediction_change_clipping_to_train_max": 0.0,
+  "max_prediction_change_between_first_and_last_validation_month": 0.0,
+  "month_index_gain_rank": 1,
+  "month_index_gain_pct": 53.51364995746083,
+  "month_index_split_count": 2164,
+  "refit_training_seconds": 2.2220045420108363,
+  "saved_prediction_max_difference": 4.547473508864641e-13,
+  "months_underpredicted": 11,
+  "months_total": 11,
+  "consecutive_rmse_increases": 4,
+  "mean_error_linear_slope_sgd_per_month": -5.200834150723515,
+  "rmse_linear_slope_sgd_per_month": -5.418337138033788,
+  "trend_note": "Slopes are unweighted descriptive summaries, not significance tests or drift tests."
+}

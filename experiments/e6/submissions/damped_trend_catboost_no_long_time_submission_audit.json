@@ -1,0 +1,114 @@
+{
+  "model": "damped_trend_catboost_no_long_time",
+  "selection": "Lowest formal validation RMSE among the requested controlled comparison; historical windows retained as robustness evidence.",
+  "train_rows": 149359,
+  "raw_train_rows": 150000,
+  "test_rows": 50000,
+  "train_period": [
+    "2021-01",
+    "2025-03"
+  ],
+  "test_period": [
+    "2025-03",
+    "2026-07"
+  ],
+  "test_deduplicated": false,
+  "residual_features": [
+    "FLOOR_AREA_SQM",
+    "flat_age",
+    "TOWN",
+    "FLAT_TYPE",
+    "FLAT_MODEL",
+    "STREET",
+    "LATITUDE",
+    "LONGITUDE",
+    "MAX_FLOOR",
+    "SUBZONE",
+    "PLANNING_AREA",
+    "mrt_distance_km",
+    "mrt_name",
+    "mrt_line_count",
+    "mall_distance_km",
+    "mall_name",
+    "calendar_month",
+    "composite_block_id"
+  ],
+  "categorical_features": [
+    "TOWN",
+    "FLAT_TYPE",
+    "FLAT_MODEL",
+    "PLANNING_AREA",
+    "calendar_month",
+    "STREET",
+    "SUBZONE",
+    "mrt_name",
+    "mall_name",
+    "composite_block_id"
+  ],
+  "excluded_long_term_residual_features": [
+    "month_index",
+    "year"
+  ],
+  "retained_seasonal_feature": "calendar_month",
+  "trend": {
+    "slope_per_month": 6.214493057961977,
+    "cutoff_effect": 482.3391645758412,
+    "mode": "damped"
+  },
+  "catboost_params": {
+    "iterations": 1000,
+    "depth": 6,
+    "learning_rate": 0.05,
+    "loss_function": "RMSE",
+    "random_seed": 42,
+    "thread_count": 4,
+    "verbose": false,
+    "allow_writing_files": false,
+    "has_time": true
+  },
+  "residual_training_rmse": 463.09243804880504,
+  "prediction_summary": {
+    "count": 50000.0,
+    "mean": 3188.762540178816,
+    "std": 452.0970031476735,
+    "min": 1664.3229883579409,
+    "25%": 2855.2294754629484,
+    "50%": 3175.410098220907,
+    "75%": 3453.7414488018376,
+    "max": 5646.102133860501
+  },
+  "checks": {
+    "rows_and_ids_match_sample": true,
+    "all_predictions_finite": true,
+    "test_order_preserved": true,
+    "training_only_fit": true
+  },
+  "input_hashes": {
+    "data/train.csv": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+    "data/test.csv": "dfc407406d957bbf7c2f005e5d9852b1bfc6546cd4186f07e6824d8e03e64cfc",
+    "data/example-submission.csv": "ab751676b2bfc6121ac3543075d4f2c8978a6d73a14a3442a1bb7bdbf7867678",
+    "data/auxiliary/sg-coe-prices.csv": "e32fccd39da32780b6b7f35d069c813ed3edb0c110ea60761656bcee58d501a5",
+    "data/auxiliary/sg-hdb-block.csv": "e6ccc60c1f901f8f476eb6fe14c07ef5941d2afd06a081a1e4c00f717da27f83",
+    "data/auxiliary/sg-mrt-stations.csv": "899460b39fb251bd6883fffc9e6a772081f8e5217a657550afc3c49cfdcd3227",
+    "data/auxiliary/sg-schools.csv": "118c7ce8d96bbc934bd53655e73e6d0848c27853a625394ecc6a67a5af54f192",
+    "data/auxiliary/sg-shopping-malls.csv": "00e05b0176ac412695fc4ce1fc5a5338a1993593ffaffe26156dc2ea04ddf2c8",
+    "data/auxiliary/sg-stock-prices.csv": "c52fef9f33cfcb11285e2b9546124e02f32488e563af44e9fb3a505d10e2edff"
+  },
+  "source_hashes": {
+    "experiments/e6/market_regression/predict_catboost_trend.py": "2a19d40c85209607f684228cd408f8515c4d0970a9c32a6badf295cf5707e3f5",
+    "experiments/e6/market_regression/catboost_trend.py": "e0709dff45643219fa298ee5c2a4b7ce15759127b7de920b75922b06c26e21cc",
+    "experiments/e6/market_regression/run.py": "1d9edb18a623b9c5632ab4b5b0aba94a477b77e15f191c981896e83579c2a64e",
+    "src/cleaning.py": "7e240ba6dffcecb159a65d3a10ab7a4b658160d18a49383a1fd4b301a6e7dd60",
+    "src/features.py": "cea56a379aa5b0e682b551bd1cea58c906064f63a081380fd3146a5fa6840d50",
+    "src/auxiliary.py": "8df7f2bc5f67dfc14d5cc949b454f69746739b55170f509bf18664659c0da984"
+  },
+  "versions": {
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.6.1",
+    "catboost": "1.2.8"
+  },
+  "submission_sha256": "05cb14f21fbc9c2363793755d2229a9d42f3a39e3324d60ce5e7f284f5debf0c",
+  "uploaded": false,
+  "kaggle_score": null
+}

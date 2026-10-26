@@ -1,0 +1,92 @@
+{
+  "configuration": "C",
+  "selection": "Lowest original formal E6 RMSE",
+  "caution": "C was worse in historical E6 backtests; this is a first submission candidate, not a demonstrated robust winner.",
+  "train_rows": 149359,
+  "raw_train_rows": 150000,
+  "test_rows": 50000,
+  "train_period": [
+    "2021-01",
+    "2025-03"
+  ],
+  "test_period": [
+    "2025-03",
+    "2026-07"
+  ],
+  "includes_former_validation_in_training": true,
+  "test_deduplicated": false,
+  "raw_features": [
+    "FLOOR_AREA_SQM",
+    "flat_age",
+    "year",
+    "TOWN",
+    "FLAT_TYPE",
+    "FLAT_MODEL",
+    "BLOCK",
+    "STREET",
+    "LATITUDE",
+    "LONGITUDE",
+    "MAX_FLOOR",
+    "SUBZONE",
+    "PLANNING_AREA",
+    "mrt_distance_km",
+    "mrt_name",
+    "mrt_line_count",
+    "mall_distance_km",
+    "mall_name",
+    "calendar_month"
+  ],
+  "model_params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbosity": -1
+  },
+  "encoding_fit": "all labeled training rows only; no joint train/test category fitting",
+  "target_transform": "none",
+  "prediction_rounding_or_clipping": "none",
+  "prediction_summary": {
+    "count": 50000.0,
+    "mean": 3140.914784806879,
+    "std": 461.8232361600217,
+    "min": 1691.5950962267882,
+    "25%": 2799.1397397587925,
+    "50%": 3136.10363792132,
+    "75%": 3410.7639564349715,
+    "max": 5382.198776540101
+  },
+  "checks": {
+    "rows_and_ids_match_sample": true,
+    "all_predictions_finite": true,
+    "test_order_preserved": true
+  },
+  "versions": {
+    "numpy": "2.2.4",
+    "pandas": "2.2.3",
+    "lightgbm": "4.6.0",
+    "scikit-learn": "1.6.1"
+  },
+  "input_hashes": {
+    "data/train.csv": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+    "data/test.csv": "dfc407406d957bbf7c2f005e5d9852b1bfc6546cd4186f07e6824d8e03e64cfc",
+    "data/example-submission.csv": "ab751676b2bfc6121ac3543075d4f2c8978a6d73a14a3442a1bb7bdbf7867678",
+    "data/auxiliary/sg-coe-prices.csv": "e32fccd39da32780b6b7f35d069c813ed3edb0c110ea60761656bcee58d501a5",
+    "data/auxiliary/sg-hdb-block.csv": "e6ccc60c1f901f8f476eb6fe14c07ef5941d2afd06a081a1e4c00f717da27f83",
+    "data/auxiliary/sg-mrt-stations.csv": "899460b39fb251bd6883fffc9e6a772081f8e5217a657550afc3c49cfdcd3227",
+    "data/auxiliary/sg-schools.csv": "118c7ce8d96bbc934bd53655e73e6d0848c27853a625394ecc6a67a5af54f192",
+    "data/auxiliary/sg-shopping-malls.csv": "00e05b0176ac412695fc4ce1fc5a5338a1993593ffaffe26156dc2ea04ddf2c8",
+    "data/auxiliary/sg-stock-prices.csv": "c52fef9f33cfcb11285e2b9546124e02f32488e563af44e9fb3a505d10e2edff"
+  },
+  "source_hashes": {
+    "experiments/e6/predict_test.py": "f0ec31d5ff32553fc1f1353e50ff353b3e924bb0d26e808ec2430c0d4a33f39b",
+    "experiments/e6/run_e6.py": "4fe2aebe07dafe0a56032531b8bbb0eacbcf7545ef1bb8dfbad67d2a7ad583f2",
+    "src/features.py": "cea56a379aa5b0e682b551bd1cea58c906064f63a081380fd3146a5fa6840d50",
+    "src/cleaning.py": "7e240ba6dffcecb159a65d3a10ab7a4b658160d18a49383a1fd4b301a6e7dd60",
+    "src/auxiliary.py": "8df7f2bc5f67dfc14d5cc949b454f69746739b55170f509bf18664659c0da984"
+  },
+  "submission_sha256": "35105219af641226fb1ac92671a9ee35fdac0cfc186cfa382cf236ca3a9241a4",
+  "uploaded": false,
+  "kaggle_score": null
+}
