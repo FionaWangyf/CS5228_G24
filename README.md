@@ -1,14 +1,22 @@
 # CS5228 HDB Rental Price Prediction
 
-Feature engineering experiments and diagnostics are organized under
-[`experiments/feature_engineering/`](experiments/feature_engineering/README.md).
-See the [consolidated results analysis](analysis/feature_engineering_results_zh.md)
-for the final E2/E3 interpretation, incremental auxiliary results, and limitations.
+## Start here
+
+| Need | Entry |
+|---|---|
+| Understand the complete experiment story and current conclusion | [E1–E6 team experiment summary](experiments/e6/TEAM_EXPERIMENT_SUMMARY_zh.md) |
+| Find an experiment or reproduction command | [Experiment index](experiments/README.md) |
+| Inspect E2/E3 feature engineering | [Feature-engineering workspace](experiments/feature_engineering/README.md) and [results analysis](analysis/feature_engineering_results_zh.md) |
+| Inspect E5 validation and error analysis | [E5 workspace](experiments/error_analysis/README.md) and [findings](analysis/e5_results_zh.md) |
+| Inspect E6 integration, follow-ups, trend models, and submissions | [E6 workspace](experiments/e6/README.md) |
+
+The current best local single model is the damped market trend plus CatBoost
+residual model documented in the team summary. The latest Kaggle-ready file is
+`experiments/e6/submissions/submission_damped_trend_catboost_no_long_time_fulltrain.csv`.
 
 This repository has a small shared experiment framework for comparable model
 results. It uses one cleaning policy, one shared feature pipeline, one fixed
-temporal split, and one set of evaluation metrics. The raw CSV files and the original
-notebooks are not modified.
+temporal split, and one set of evaluation metrics. Raw CSV files are not modified.
 
 ## Setup
 
@@ -188,8 +196,8 @@ or mappings must be fitted on training data only.
 
 `load_auxiliary` reads and cleans the six auxiliary CSVs. `make_auxiliary` turns
 them into join-ready tables, and `attach_auxiliary` joins whichever tables are in
-the dict it receives, so a table-level ablation is just a smaller dict
-(`experiments/example_attach.ipynb`):
+the dict it receives, so a table-level ablation is just a smaller dict. The
+controlled implementations are under `experiments/feature_engineering/`:
 
 ```python
 from src.auxiliary import attach_auxiliary, load_auxiliary

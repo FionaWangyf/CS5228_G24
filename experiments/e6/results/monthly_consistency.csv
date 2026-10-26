@@ -1,0 +1,16 @@
+fold,candidate,control,months,rmse_better_months,mae_better_months
+formal_2024_04,B,A,11,2,1
+formal_2024_04,C,A,11,7,6
+formal_2024_04,C,B,11,8,7
+formal_2024_04,D,A,11,1,2
+formal_2024_04,D,B,11,7,7
+origin_2022_06,B,A,16,11,12
+origin_2022_06,C,A,16,0,0
+origin_2022_06,C,B,16,0,0
+origin_2022_06,D,A,16,6,10
+origin_2022_06,D,B,16,3,4
+origin_2022_12,B,A,16,9,8
+origin_2022_12,C,A,16,1,0
+origin_2022_12,C,B,16,1,0
+origin_2022_12,D,A,16,2,3
+origin_2022_12,D,B,16,3,3

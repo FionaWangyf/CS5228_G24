@@ -1,0 +1,89 @@
+{
+  "configuration": "B",
+  "status": "recommended parsimonious integration; not an independently validated winner",
+  "features": [
+    "FLOOR_AREA_SQM",
+    "flat_age",
+    "month_index",
+    "TOWN",
+    "FLAT_TYPE",
+    "FLAT_MODEL",
+    "BLOCK",
+    "STREET",
+    "LATITUDE",
+    "LONGITUDE",
+    "MAX_FLOOR",
+    "SUBZONE",
+    "PLANNING_AREA",
+    "mrt_distance_km",
+    "mrt_name",
+    "mrt_line_count",
+    "mall_distance_km",
+    "mall_name"
+  ],
+  "auxiliary_groups": [
+    "hdb",
+    "mrt",
+    "malls"
+  ],
+  "model": "LGBMRegressor",
+  "model_params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbosity": -1
+  },
+  "time_representation": "month_index",
+  "numeric_preprocessing": "no scaling or median imputation; retain NaN for LightGBM",
+  "low_card_encoding": "onehot, drop first, unknown ignore; fit on training only",
+  "high_card_encoding": "numeric ordinal, unknown -1; fit on training only",
+  "rationale": [
+    "B removes four Schools features; RMSE gains at two historical origins are small and mixed across metrics.",
+    "Formal RMSE is 0.894144 worse than A; simpler configuration is a judgment under the predeclared parsimony rule, not universal superiority.",
+    "C degrades historical and late-formal performance; do not replace month_index.",
+    "Removing MRT (D) worsens overall RMSE and MAE at all three origins."
+  ],
+  "alternative": "A retains Schools and is better than B on the previously examined formal period.",
+  "metrics": [
+    {
+      "fold": "origin_2022_06",
+      "configuration": "B",
+      "train_rows": 55008,
+      "validation_rows": 44893,
+      "cutoff": "2022-06",
+      "validation_end": "2023-10",
+      "RMSE": 789.3067438517992,
+      "MAE": 647.9158318106511,
+      "R2": -0.099551908246531,
+      "Mean Error": -467.0455121584998
+    },
+    {
+      "fold": "origin_2022_12",
+      "configuration": "B",
+      "train_rows": 70182,
+      "validation_rows": 47595,
+      "cutoff": "2022-12",
+      "validation_end": "2024-04",
+      "RMSE": 611.598775339913,
+      "MAE": 501.11886361373,
+      "R2": 0.3080541578534281,
+      "Mean Error": -141.6816781321264
+    },
+    {
+      "fold": "formal_2024_04",
+      "configuration": "B",
+      "train_rows": 117777,
+      "validation_rows": 31582,
+      "cutoff": "2024-04",
+      "validation_end": "2025-03",
+      "RMSE": 476.638723833772,
+      "MAE": 353.93343459731807,
+      "R2": 0.4764014536343868,
+      "Mean Error": -46.58670758194998
+    }
+  ],
+  "test_csv_used": false,
+  "kaggle_model_trained": false
+}

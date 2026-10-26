@@ -1,0 +1,31 @@
+{
+  "new_model": "Trend_damped_CatBoost_no_long_time",
+  "single_new_candidate": true,
+  "trend": "reuse adjusted monthly effects; recent-12-month slope; last-3-month anchor; six-month exponential damping",
+  "residual_model": "CatBoost on residual rent after subtracting fitted training-month effect",
+  "removed_residual_features": [
+    "month_index",
+    "year"
+  ],
+  "retained_seasonal_feature": "calendar_month",
+  "catboost_params": {
+    "iterations": 1000,
+    "depth": 6,
+    "learning_rate": 0.05,
+    "loss_function": "RMSE",
+    "random_seed": 42,
+    "thread_count": 4,
+    "verbose": false,
+    "allow_writing_files": false,
+    "has_time": true
+  },
+  "comparators": {
+    "B_CatBoost": "B_address_catboost",
+    "Trend_damped_LightGBM": "Trend_damped_LGBM"
+  },
+  "ensemble": "fixed 0.5 B CatBoost + 0.5 damped-trend LightGBM",
+  "outer_validation_used_for_fitting": false,
+  "test_csv_used": false,
+  "train_sha256": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+  "script_sha256": "e0709dff45643219fa298ee5c2a4b7ce15759127b7de920b75922b06c26e21cc"
+}

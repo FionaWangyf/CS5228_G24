@@ -1,0 +1,63 @@
+{
+  "specs": {
+    "C_baseline": [
+      false,
+      false,
+      "ordinal",
+      false
+    ],
+    "C_clean": [
+      true,
+      false,
+      "ordinal",
+      false
+    ],
+    "C_address": [
+      false,
+      true,
+      "ordinal",
+      false
+    ],
+    "C_address_native": [
+      false,
+      true,
+      "native",
+      false
+    ],
+    "C_address_history": [
+      false,
+      true,
+      "ordinal",
+      true
+    ],
+    "C_address_native_history": [
+      false,
+      true,
+      "native",
+      true
+    ],
+    "C_clean_address_native_history": [
+      true,
+      true,
+      "native",
+      true
+    ]
+  },
+  "params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "random_state": 42,
+    "n_jobs": -1,
+    "verbosity": -1
+  },
+  "filter": "quarter/town/type/area peers; min30; log median +/- max(3.5*1.4826*MAD,log1.5)",
+  "history": "strict prior month trailing6, hierarchical smoothing weight20; freeze validation at train cutoff",
+  "test_used": false,
+  "validation_rows_removed": 0,
+  "train_sha256": "6d7a417de72112361f8353659ba6fe44a442b07465b488aff1b03f7ec1ea3ba6",
+  "source_hashes": {
+    "run.py": "06ff3b65d735f6fbbfcf05163e8dcafee5e9dba5a090a523954b207dae3622f7",
+    "clean_similar.py": "7497d9cfd89c11af4d6b4182c5d99bd738c2a53fe0296ed7aa49471306f44ab3"
+  }
+}

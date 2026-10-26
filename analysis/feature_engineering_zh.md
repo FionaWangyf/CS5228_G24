@@ -86,7 +86,9 @@ all joined 后特征分成三类：
 
 ## 5. 表级别消融
 
-`experiments/example_attach.ipynb` 固定编码方式，只改变 attach 的副表：
+早期探索性表级消融固定编码方式，只改变 attach 的副表。该实验使用的
+模型配置和宏观数据时间口径与正式 E3 不同；正式结论应以
+`experiments/feature_engineering/e3_auxiliary_features.ipynb` 及其保存结果为准：
 
 - listing only
 - listing + all joined
